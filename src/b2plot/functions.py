@@ -1,4 +1,4 @@
- # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 In this file all the matplolib wrappers are located.
 
@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 
 
 def _hist_init(data, bins=None, xrange=None):
+
     xaxis = TheManager.Instance().get_x_axis()
     if xaxis is None or bins is not None or xrange is not None:
         if bins is None:
@@ -21,6 +22,25 @@ def _hist_init(data, bins=None, xrange=None):
         _, xaxis = np.histogram(data, bins, xrange)
 
     return xaxis
+
+
+def remove_nans(data, weights=None, stacked=False):
+    """
+    Remove NaN elements in data array, and corresponding weights too.
+    """
+
+    if not stacked:
+        data_new = data[~np.isnan(data)]
+    else:
+        data_new = [d[~np.isnan(d)] for d in data]
+    weights_new = None
+    if weights is not None:
+        if not stacked:
+            weights_new = weights[~np.isnan(data)]
+        else:
+            weights_new = [w[~np.isnan(data[idx])] for idx, w in enumerate(weights)]
+
+    return data_new, weights_new
 
 
 def text(t, x=0.8, y=0.9, fontsize=22, *args, **kwargs):
@@ -42,7 +62,7 @@ STYLES_hatches = [None, '///', r"\\\ ",  'xxx', '--', '++', 'o', ".+", 'xx', '//
 
 
 def hist(data, bins=None, fill=False, range=None, lw=1., ax=None, style=None, color=None, scale=None, weights=None,
-         label=None, edgecolor=None, fillalpha=0.5, *args, **kwargs):
+         label=None, edgecolor=None, fillalpha=0.5, paint_uoflow=False, *args, **kwargs):
     """
 
     Args:
@@ -56,6 +76,7 @@ def hist(data, bins=None, fill=False, range=None, lw=1., ax=None, style=None, co
         color:
         scale:
         weights:
+        paint_uoflow: draw u/oflow content in first/last visible bin. Requires bins to be an iterable.
         *args:
         **kwargs:
 
@@ -63,14 +84,21 @@ def hist(data, bins=None, fill=False, range=None, lw=1., ax=None, style=None, co
 
     """
 
+    if type(data) is pd.Series:
+        data = data.values
+
+    if type(weights) is pd.Series:
+        weights = weights.values
+
+    data, weights = remove_nans(data, weights)
+
+    if weights is None:
+        weights = np.ones(len(data))
 
     if ax is None:
         ax = plt.gca()
 
     xaxis = _hist_init(data, bins, xrange=range)
-
-    if type(data) is pd.Series:
-        data = data.values
 
     if isinstance(color, int):
         color = b2cm[color % len(b2cm)]
@@ -89,9 +117,6 @@ def hist(data, bins=None, fill=False, range=None, lw=1., ax=None, style=None, co
     else:
         style = 0
 
-    if weights is None:
-        weights = np.ones(len(data))
-
     if scale is not None:
         if isinstance(scale, int) or isinstance(scale, float):
             if not isinstance(scale, bool):
@@ -100,6 +125,15 @@ def hist(data, bins=None, fill=False, range=None, lw=1., ax=None, style=None, co
             print("Please provide int or float with scale")
 
     edgecolor = color if edgecolor is None else edgecolor
+
+    if paint_uoflow:
+        first = last = None
+        if isinstance(bins, np.ndarray):
+            first, last = bins.flat[0], bins.flat[-1]
+        if isinstance(bins, list):
+            first, last = bins[0], bins[-1]
+        if first != None and last != None:
+            data = np.clip(data, first, last)
 
     if fill:
         # edgecolor = 'black' if style == 0 else color
@@ -138,8 +172,8 @@ def to_stack(df, col, by):
     return x_data
 
 
-def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=None, edgecolor='black',
-            *args, **kwargs):
+def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=None, edgecolor='black', paint_uoflow=False,
+            weights=None, *args, **kwargs):
     """ Create stacked histogram
 
     Args:
@@ -166,6 +200,8 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
         assert isinstance(df, list), "Please provide DataFrame or List"
         data = df
 
+    data, weights = remove_nans(data, weights, stacked=True)
+
     if ax is None:
         ax = plt.gca()
 
@@ -175,18 +211,28 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
         if n_stacks < 20:
             color = b2helix(n_stacks)
 
+    if paint_uoflow:
+        first = last = None
+        if isinstance(bins, np.ndarray):
+            first, last = bins.flat[0], bins.flat[-1]
+        if isinstance(bins, list):
+            first, last = bins[0], bins[-1]
+        if first != None and last != None:
+            data = [ np.clip(d, first, last) for d in data ]
+
     xaxis = _hist_init(data[0], bins, xrange=range)
 
     y, xaxis, stuff = ax.hist(data, xaxis, histtype='stepfilled',
-                          lw=lw, color=color, edgecolor=edgecolor, stacked=True, *args, **kwargs)
+                              lw=lw, color=color, edgecolor=edgecolor, stacked=True, weights=weights, *args, **kwargs)
 
     TheManager.Instance().set_x_axis(xaxis)
 
     return y[-1], xaxis, stuff  # dangerous list index
 
 
+
 def errorhist(data, bins=None, color=None, normed=False, fmt='.', range=None, scale=None,
-              x_err=False, box=False, ax=None, weights=None, plot_zero=True, label=None, *args, **kwargs):
+              x_err=False, box=False, ax=None, weights=None, plot_zero=True, label=None, paint_uoflow=False, *args, **kwargs):
     """
 
     :param data:
@@ -199,16 +245,18 @@ def errorhist(data, bins=None, color=None, normed=False, fmt='.', range=None, sc
     :return:
     """
 
+    if type(data) is pd.Series:
+        data = data.values
+
+    data, weights = remove_nans(data, weights)
+
+    if weights is None:
+        weights = np.ones(len(data))
+
     xaxis = _hist_init(data, bins, xrange=range)
 
     if ax is None:
         ax = plt.gca()
-
-    if type(data) is pd.Series:
-        data = data.values
-
-    if weights is None:
-        weights = np.ones(len(data))
 
     if scale is not None:
         if isinstance(scale, int) or isinstance(scale, float):
@@ -216,6 +264,15 @@ def errorhist(data, bins=None, color=None, normed=False, fmt='.', range=None, sc
                 weights *= scale
         else:
             print("Please provide int or float with scale")
+
+    if paint_uoflow:
+        first = last = None
+        if isinstance(bins, np.ndarray):
+            first, last = bins.flat[0], bins.flat[-1]
+        if isinstance(bins, list):
+            first, last = bins[0], bins[-1]
+        if first != None and last != None:
+            data = np.clip(data, first, last)
 
     y, x = np.histogram(data, xaxis, normed=normed, weights=weights)
     err = (-0.5 + np.sqrt(np.array(y + 0.25)), +0.5 + np.sqrt(np.array(y + 0.25)))  # np.sqrt(np.array(y))
