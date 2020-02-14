@@ -43,6 +43,22 @@ def remove_nans(data, weights=None, stacked=False):
     return data_new, weights_new
 
 
+def clip_data(data, bins=None, x_range=None):
+
+    first = last = None
+    if isinstance(x_range, tuple):
+        first, last = x_range
+    if isinstance(bins, np.ndarray):
+        first, last = bins.flat[0], bins.flat[-1]
+    if isinstance(bins, list):
+        first, last = bins[0], bins[-1]
+
+    if first is not None and last is not None:
+        return np.clip(data, first, last)
+
+    return data
+
+
 def text(t, x=0.8, y=0.9, fontsize=22, *args, **kwargs):
     """
 
@@ -98,8 +114,6 @@ def hist(data, bins=None, fill=False, range=None, lw=1., ax=None, style=None, co
     if ax is None:
         ax = plt.gca()
 
-    xaxis = _hist_init(data, bins, xrange=range)
-
     if isinstance(color, int):
         color = b2cm[color % len(b2cm)]
 
@@ -127,13 +141,9 @@ def hist(data, bins=None, fill=False, range=None, lw=1., ax=None, style=None, co
     edgecolor = color if edgecolor is None else edgecolor
 
     if paint_uoflow:
-        first = last = None
-        if isinstance(bins, np.ndarray):
-            first, last = bins.flat[0], bins.flat[-1]
-        if isinstance(bins, list):
-            first, last = bins[0], bins[-1]
-        if first != None and last != None:
-            data = np.clip(data, first, last)
+        data = clip_data(data, bins=bins, x_range=range)
+
+    xaxis = _hist_init(data, bins, xrange=range)
 
     if fill:
         # edgecolor = 'black' if style == 0 else color
@@ -212,13 +222,7 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
             color = b2helix(n_stacks)
 
     if paint_uoflow:
-        first = last = None
-        if isinstance(bins, np.ndarray):
-            first, last = bins.flat[0], bins.flat[-1]
-        if isinstance(bins, list):
-            first, last = bins[0], bins[-1]
-        if first != None and last != None:
-            data = [ np.clip(d, first, last) for d in data ]
+        data = [clip_data(d, bins=bins, x_range=range) for d in data]
 
     xaxis = _hist_init(data[0], bins, xrange=range)
 
@@ -228,7 +232,7 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
     TheManager.Instance().set_x_axis(xaxis)
 
     return y[-1], xaxis, stuff  # dangerous list index
-
+    #return y, xaxis, stuff  # very dangerous... I had to remove it - Daniel
 
 
 def errorhist(data, bins=None, color=None, normed=False, fmt='.', range=None, scale=None,
@@ -253,8 +257,6 @@ def errorhist(data, bins=None, color=None, normed=False, fmt='.', range=None, sc
     if weights is None:
         weights = np.ones(len(data))
 
-    xaxis = _hist_init(data, bins, xrange=range)
-
     if ax is None:
         ax = plt.gca()
 
@@ -266,13 +268,9 @@ def errorhist(data, bins=None, color=None, normed=False, fmt='.', range=None, sc
             print("Please provide int or float with scale")
 
     if paint_uoflow:
-        first = last = None
-        if isinstance(bins, np.ndarray):
-            first, last = bins.flat[0], bins.flat[-1]
-        if isinstance(bins, list):
-            first, last = bins[0], bins[-1]
-        if first != None and last != None:
-            data = np.clip(data, first, last)
+        data = clip_data(data, bins=bins, x_range=range)
+
+    xaxis = _hist_init(data, bins, xrange=range)
 
     y, x = np.histogram(data, xaxis, normed=normed, weights=weights)
     err = (-0.5 + np.sqrt(np.array(y + 0.25)), +0.5 + np.sqrt(np.array(y + 0.25)))  # np.sqrt(np.array(y))
@@ -295,10 +293,9 @@ def errorhist(data, bins=None, color=None, normed=False, fmt='.', range=None, sc
 
     errorbar(bin_centers, y, err, x_err, box, plot_zero, fmt, color, ax, label=label, *args, **kwargs)
 
-
     TheManager.Instance().set_x_axis(xaxis)
 
-    return y, bin_centers, err
+    return y, x, bin_centers, err
 
 
 def errorbar(bin_centers, y, y_err, x_err=None, box=False, plot_zero=True, fmt='.',
