@@ -224,6 +224,9 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
     if paint_uoflow:
         data = [clip_data(d, bins=bins, x_range=range) for d in data]
 
+    # Make sure data is a Python list at this point.
+    assert isinstance(data, list), f"'data' should be a list(np.array), but now it is of type: {type(data)}"
+
     xaxis = _hist_init(data[0], bins, xrange=range)
 
     y, xaxis, stuff = ax.hist(data, xaxis, histtype='stepfilled',
@@ -232,7 +235,6 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
     TheManager.Instance().set_x_axis(xaxis)
 
     return y[-1], xaxis, stuff  # dangerous list index
-    #return y, xaxis, stuff  # very dangerous... I had to remove it - Daniel
 
 
 def errorhist(data, bins=None, color=None, normed=False, fmt='.', range=None, scale=None,
