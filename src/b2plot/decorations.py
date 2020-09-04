@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 
 
-def draw_y_label(label='Entries', unit=None, ha='right', brackets=True,ax=None, *args, **kwargs):
+def draw_y_label(label='Entries', unit=None, ha='right', brackets=True, *args, **kwargs):
     """ Plotting scientific notation y label
 
 
@@ -23,9 +23,6 @@ def draw_y_label(label='Entries', unit=None, ha='right', brackets=True,ax=None, 
     Returns:
 
     """
-    if ax is None:
-        ax = plt.gca()
-
     br_open = ''
     br_close = ''
     if brackets:
@@ -37,14 +34,14 @@ def draw_y_label(label='Entries', unit=None, ha='right', brackets=True,ax=None, 
 
     x_axis = manager.get_x_axis()
     if unit is None:
-        ax.set_ylabel(label, ha=ha, *args, **kwargs)
+        plt.ylabel(label, ha=ha, *args, **kwargs)
     else:
         try:
             width = x_axis[1] - x_axis[0]
         except TypeError:
-            ax.set_ylabel(label+' /' + br_open + ' ' + unit + br_close, ha=ha, *args, **kwargs)
+            plt.ylabel(label+' /' + br_open + ' ' + unit + br_close, ha=ha, *args, **kwargs)
         else:
-            ax.set_ylabel(label+' /' + br_open + "{0:.3f}".format(width).rstrip('0').rstrip('.') + ' ' + unit + br_close, ha=ha, *args, **kwargs)
+            plt.ylabel(label+' /' + br_open + "{0:.3f}".format(width).rstrip('0').rstrip('.') + ' ' + unit + br_close, ha=ha, *args, **kwargs)
 
 
 def watermark(t=None,logo="Belle II", px=0.033, py=0.915, fontsize=16, alpha=0.8, alpha_logo=0.95, shift=0.15, bstyle='italic', *args, **kwargs):
@@ -111,10 +108,7 @@ def set_style():
     plt.subplots_adjust(left=0.15, right=0.92, top=0.92, bottom=0.15)
 
 
-def labels(xlabel=None, ylabel=None, unit=None, root_style=False, brackets=True, overwrite=None,ax=None, *args, **kwargs):
-
-    if ax is None:
-      ax = plt.gca()
+def labels(xlabel=None, ylabel=None, unit=None, root_style=False, brackets=True, overwrite=None, *args, **kwargs):
 
     br_open = ''
     br_close = ''
@@ -135,23 +129,23 @@ def labels(xlabel=None, ylabel=None, unit=None, root_style=False, brackets=True,
     if overwrite is not None:
         if xlabel in overwrite:
             try:
-                xlabel = overwrite[xlabel]
+                xlable = overwrite[xlabel]
             except:
                 pass
 
     if xlabel is not None:
-        ax.set_xlabel(xlabel, horizontalalignment=ha, x=x, *args, **kwargs)
+        plt.xlabel(xlabel, horizontalalignment=ha, x=x, *args, **kwargs)
 
     if unit is not None:
         if unit is not '':
-            ax.set_xlabel(xlabel + br_open + unit + br_close, ha=ha, x=x, *args, **kwargs)
+            plt.xlabel(xlabel + br_open + unit + br_close, ha=ha, x=x, *args, **kwargs)
         if ylabel is not None:
-            draw_y_label(ylabel, unit,  horizontalalignment=ha, y=y, brackets=brackets,ax=ax *args, **kwargs)
+            draw_y_label(ylabel, unit,  horizontalalignment=ha, y=y, brackets=brackets, *args, **kwargs)
     else:
         if xlabel is not None:
-            ax.set_xlabel(xlabel, horizontalalignment=ha, x=x,  *args, **kwargs)
+            plt.xlabel(xlabel, horizontalalignment=ha, x=x,  *args, **kwargs)
         if ylabel is not None:
-            draw_y_label(ylabel,  horizontalalignment=ha, y=y, brackets=brackets,ax = ax, *args, **kwargs)
+            draw_y_label(ylabel,  horizontalalignment=ha, y=y, brackets=brackets, *args, **kwargs)
 
 
 def decorate(*args, **kwargs):
