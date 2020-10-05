@@ -145,8 +145,8 @@ def draw_colz(values, xedges, yedges, errup, errdown,
               col_min=None, col_max=None,
               annotate=True, cmap='sequential',
               ax=None):
-    """ Draws a COLZ plot, can be used in conjunction with pythEfficiency,
-    annotates the bins.
+    """ Draws a COLZ plot, can be used in conjunction with divide_efficiency,
+    annotates the bins if called.
 
     Args:
         values: values that correspond to each bin.
