@@ -9,7 +9,7 @@ import b2plot
 
 
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 def hist2root(h, name=None, title=''):
     """ Convert your histograms to a root histogram.. if you really want to
@@ -137,3 +137,57 @@ def figure(*args, **kwargs):
 def replot():
     print("replotting")
     TheManager.Instance().replot()
+
+
+def draw_colz(values, xedges, yedges, errup, errdown,
+              XName='X', YName='Y',
+              cbarName='efficiency',
+              col_min=None, col_max=None,
+              annotate=True, cmap='sequential',
+              ax=None):
+
+    if ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=(12, 10))
+    fig = plt.gcf()
+
+    if cmap=='sequential':
+        cmap = 'rocket'
+    elif cmap=='diverging':
+        cmap = 'coolwarm'
+    elif isinstance(cmap, str):
+        cmap = cmap
+    else:
+        print('Neither sequential, nor diverging colormap selected.\
+               Failed to read specified colormap. Defaulting to viridis.')
+        cmap = 'viridis'
+
+    # For whatever reason values have to be transposed in color mesh.
+    colz = ax.pcolormesh(xedges, yedges, np.transpose(values),
+                         vmin=col_min, vmax=col_max,
+                         cmap=cmap, shading='flat')
+    fig.colorbar(colz, ax=ax, label=cbarName)
+
+    # Drawing the errors in each cell when annotate is True.
+    if annotate:
+        for ix, x in enumerate(xedges[:-1]):
+            for iy, y in enumerate(yedges[:-1]):
+                ratio = values[ix][iy]
+                # Doesn't draw anything in cells with 0 efficiency or with nan.
+                if not ratio or ratio != ratio:
+                    continue
+                err_up = errup[ix][iy]
+                err_down = errdown[ix][iy]
+                # This draw position and size might need some tweaking in the future.
+                draw_position = (x+np.abs(x-xedges[ix+1])/2,
+                                 y+np.abs(y-yedges[iy+1])/2.)
+                size_points = 80*(np.abs(x-xedges[ix+1]))/np.abs(xedges[0]-xedges[-1])
+                ax.annotate(f'${ratio:.3f}\pm^{{{err_up:.3f}}}_{{{err_down:.3f}}}$',
+                            draw_position,
+                            ha='center', va='center', size=size_points)
+
+    ax.set_xlabel(XName)
+    ax.set_ylabel(YName)
+    ax.set_xlim(xedges[0], xedges[-1])
+    ax.set_ylim(yedges[0], yedges[-1])
+
+    return fig, ax
