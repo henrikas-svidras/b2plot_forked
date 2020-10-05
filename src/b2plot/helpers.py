@@ -145,6 +145,25 @@ def draw_colz(values, xedges, yedges, errup, errdown,
               col_min=None, col_max=None,
               annotate=True, cmap='sequential',
               ax=None):
+    """ Draws a COLZ plot, can be used in conjunction with pythEfficiency,
+    annotates the bins.
+
+    Args:
+        values: values that correspond to each bin.
+        xedges: edges that make up bins for x axis.
+        yedges: edges that make up bins for y axis.
+        errup, errdown:  upper/lower error for values, must be the same size as values.
+        XName, YName: names for x and y axis.
+        cbarName: name displayed next to color bar.
+        col_min, col_max: minimum and maximum values for the color bar.
+        annotate: if True, writes the value and errors.
+        cmap: cmap to pass, as string. 'sequential' and 'diverging' exist as predefined defaults.
+        ax: axis to draw on. If not specified creates new.
+
+    Outputs:
+        fig, ax: drawn figure and axis
+
+    """
 
     if ax is None:
         fig, ax = plt.subplots(1, 1, figsize=(12, 10))
