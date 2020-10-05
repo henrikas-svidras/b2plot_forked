@@ -21,5 +21,5 @@ def test_divideEfficiency():
 
 def test_divideEfficiency_half():
     t = np.ones(10)
-    res = bp.analysis.divideEfficiency(t,t*2)
+    res = bp.analysis.divideEfficiency(t, t*2)
     assert np.mean(res[0]) == 0.5, "should be 0.5"    

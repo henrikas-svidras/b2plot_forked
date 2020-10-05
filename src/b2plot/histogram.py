@@ -397,3 +397,9 @@ def profile(x, y, bins=None, range=None, fmt='.', *args, **kwargs):
 
     bin_centers = (xaxis[:-1] + xaxis[1:]) / 2.
     return plt.errorbar(x=bin_centers, y=means, yerr=std, linestyle='none', fmt=fmt, *args, **kwargs)
+
+
+def bc(b):
+    """ return bin centers
+    """
+    return (b[1:] + b[:-1])/2
