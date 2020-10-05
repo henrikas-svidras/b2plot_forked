@@ -118,7 +118,7 @@ def exact_CI(k, n, conf=0.683):
         ratio, [upper ratio error, lower ratio error]
     """
 
-    assert k <= n
+    assert k <= n, f"denominator {n} found to be smaller than numerator {k} when calculating interval."
 
     from scipy.stats import beta
     k = float(k)
