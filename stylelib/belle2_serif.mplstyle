@@ -24,7 +24,7 @@ mathtext.sf  : sans
 mathtext.fontset : cm # Should be 'dejavusans' (default),
                                # 'dejavuserif', 'cm' (Computer Modern), 'stix',
                                # 'stixsans' or 'custom'
-mathtext.fallback_to_cm : True  # When True, use symbols from the Computer Modern
+mathtext.fallback : 'cm'  # When True, use symbols from the Computer Modern
                                  # fonts when a symbol can not be found in one of
                                  # the custom math fonts.
 
