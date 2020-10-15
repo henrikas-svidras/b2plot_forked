@@ -11,6 +11,26 @@ Description
 Style and plotting tools for matplotlib.
 
 
+Installation
+============
+
+Download this repository and run:
+
+```bash
+
+python3 ./setup.py develop --user
+
+```
+
+The matolotlib style can be installed in the sytlelib folder:
+
+```bash
+
+./stylelib/install_mlp_style.sh
+
+```
+
+
 Usage
 =====
 
@@ -81,21 +101,3 @@ bp.stacked(df, col="mass", by='exp', bins=50,)
 
 
 ![Example](examples/stacked_plot.png?raw=true "Title")
-
-
-Installation
-============
-
-```bash
-
-python3 ./setup.py develop --user
-
-```
-
-The matolotlib style can be installed in the sytlelib folder:
-
-```bash
-
-./stylelib/install_mlp_style.sh
-
-```

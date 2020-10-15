@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 
 
-def draw_y_label(label='Entries', unit=None, ha='right', brackets=True, *args, **kwargs):
+def draw_y_label(label='Entries', unit=None, ha='right', brackets=True,ax=None, *args, **kwargs):
     """ Plotting scientific notation y label
 
 
@@ -23,6 +23,9 @@ def draw_y_label(label='Entries', unit=None, ha='right', brackets=True, *args, *
     Returns:
 
     """
+    if ax is None:
+        ax = plt.gca()
+
     br_open = ''
     br_close = ''
     if brackets:
@@ -34,14 +37,15 @@ def draw_y_label(label='Entries', unit=None, ha='right', brackets=True, *args, *
 
     x_axis = manager.get_x_axis()
     if unit is None:
-        plt.ylabel(label, ha=ha, *args, **kwargs)
+        ax.set_ylabel(label, ha=ha, *args, **kwargs)
     else:
         try:
             width = x_axis[1] - x_axis[0]
         except TypeError:
-            plt.ylabel(label+' /' + br_open + ' ' + unit + br_close, ha=ha, *args, **kwargs)
+            ax.set_ylabel(label+' /' + br_open + ' ' + unit + br_close, ha=ha, *args, **kwargs)
         else:
-            plt.ylabel(label+' /' + br_open + "{0:.3f}".format(width).rstrip('0').rstrip('.') + ' ' + unit + br_close, ha=ha, *args, **kwargs)
+            ax.set_ylabel(label+' /' + br_open + "{0:.3f}".format(width).rstrip('0').rstrip('.') + ' ' + unit + br_close, ha=ha, *args, **kwargs)
+
 
 
 def watermark(t=None,logo="Belle II", px=0.5, py=0.92, transform=plt.gca().transAxes, fontsize=16, alpha=0.7, alpha_logo=0.95, shift=0.08,  *args, **kwargs):
@@ -68,7 +72,7 @@ def watermark(t=None,logo="Belle II", px=0.5, py=0.92, transform=plt.gca().trans
     plt.text(px, py, logo, ha='center',
              transform=transform,
              fontsize=fontsize,
-             style='italic',
+             style=bstyle,
              alpha=alpha_logo,
              weight='bold',
              *args, **kwargs,
@@ -86,7 +90,11 @@ def watermark(t=None,logo="Belle II", px=0.5, py=0.92, transform=plt.gca().trans
 
 
 def lumi(l="$5\; pb^{-1}$", px=0.75, py=0.85, transform=plt.gca().transAxes):
-    plt.text(px, py, "$\int\,L\,dt\;=\;$" + l, transform=transform)
+    plt.text(px, py, "$\int\,L\,\mathrm{dt}\;=\;$" + l, transform=transform, *args, **kwargs)
+
+
+def text(t, px=0.033, py=0.763, *args, **kwargs):
+    plt.text(px, py, t, transform=plt.gca().transAxes, *args, **kwargs)
 
 
 def expand(factor =1.2):
@@ -104,16 +112,19 @@ def set_style():
     plt.subplots_adjust(left=0.15, right=0.92, top=0.92, bottom=0.15)
 
 
-def labels(xlabel=None, ylabel=None, unit=None, root_style=False, brackets=True, *args, **kwargs):
+def labels(xlabel=None, ylabel=None, unit=None, root_style=False, brackets=True, overwrite=None,ax=None, *args, **kwargs):
+
+    if ax is None:
+      ax = plt.gca()
 
     br_open = ''
     br_close = ''
     if brackets:
-        br_open = ' ('
-        br_close = ')'
-    if brackets == 'square':
         br_open = ' ['
         br_close = ']'
+    if brackets == 'round':
+        br_open = ' ('
+        br_close = ')'
 
     ha = 'center'
     x, y = .5, .5
@@ -122,19 +133,26 @@ def labels(xlabel=None, ylabel=None, unit=None, root_style=False, brackets=True,
         ha = 'right'
         x, y = 1, 1
 
+    if overwrite is not None:
+        if xlabel in overwrite:
+            try:
+                xlabel = overwrite[xlabel]
+            except:
+                pass
+
     if xlabel is not None:
-        plt.xlabel(xlabel, horizontalalignment=ha, x=x, *args, **kwargs)
+        ax.set_xlabel(xlabel, horizontalalignment=ha, x=x, *args, **kwargs)
 
     if unit is not None:
         if unit is not '':
-            plt.xlabel(xlabel + br_open + unit + br_close, ha=ha, x=x, *args, **kwargs)
+            ax.set_xlabel(xlabel + br_open + unit + br_close, ha=ha, x=x, *args, **kwargs)
         if ylabel is not None:
-            draw_y_label(ylabel, unit,  horizontalalignment=ha, y=y, brackets=brackets, *args, **kwargs)
+            draw_y_label(ylabel, unit,  horizontalalignment=ha, y=y, brackets=brackets,ax=ax *args, **kwargs)
     else:
         if xlabel is not None:
-            plt.xlabel(xlabel, horizontalalignment=ha, x=x,  *args, **kwargs)
+            ax.set_xlabel(xlabel, horizontalalignment=ha, x=x,  *args, **kwargs)
         if ylabel is not None:
-            draw_y_label(ylabel,  horizontalalignment=ha, y=y, brackets=brackets, *args, **kwargs)
+            draw_y_label(ylabel,  horizontalalignment=ha, y=y, brackets=brackets,ax = ax, *args, **kwargs)
 
 
 def decorate(*args, **kwargs):

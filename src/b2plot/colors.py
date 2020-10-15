@@ -22,6 +22,19 @@ solarized = ["#dc322f", "#268bd2", "#b58900", "#859900", "#2aa198", "#c4a000", "
 groovebox = ["#cc241d", "#458588", "#d79921", "#98971a", "#b16286", "#689d6a", "#d65d0e", "#fbf1c7"]
 
 
+wald_blau = ['#6DA3D6', '#8CC1D8','#1C8BE2','#1363B2','#5069C6','#235F9D']
+wald_rot = ['#C44462', '#E8636C','#F48E4B','#F3B427',]
+wald_gruen = ['#27D1DE', '#30CBA3','#24AD2F','#B2C54F',]
+wald_lila = ['#928AB2', '#ABA8C5','#D1B7C9','#C987A6',]
+wald = wald_blau + wald_rot + wald_gruen + wald_lila
+
+
+wald2_gruen = ['#A2CC54', '#089529', '#047370']
+wald2_blau = ['#7EBCED', '#2C98FC', '#0949AE', '#1A2647']
+wald2_rot = ['#E5444D', '#C62B48', '#6E313E', '#4A3451']
+wald2_yellow = ['#D9CC9E', '#E69F15', '#EA6E26']
+
+
 def cm(n):
     return b2cm[:n % len(b2cm)]
 

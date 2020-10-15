@@ -26,7 +26,8 @@ df['exp'] = np.random.randint(0, 6, ns+nb)
 df = pd.DataFrame(df)
 
 # Automatic creation of a stacked plot of 'mass' split by values of 'exp'
-bp.stacked(df, col="mass", by='exp', bins=50,)
+bp.stacked(df, col="mass", by='exp', bins=50, scale=[1,1,1,1,10,1])
+plt.legend()
 
 bp.xlim()
 bp.labels('$\Delta M$', "Events", "GeV", 0)
