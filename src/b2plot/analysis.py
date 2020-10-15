@@ -73,7 +73,7 @@ def ratio(y1, y2, y1_err=None, y2_err= None):
     return r, re
 
 
-def divideEfficiency(n_nom, n_denom, confidence=0.683):
+def divide_efficiency(n_nom, n_denom, confidence=0.683):
     """ divides two histograms for an efficiency calculation
 
     Args:
@@ -118,16 +118,25 @@ def exact_CI(k, n, conf=0.683):
         ratio, [upper ratio error, lower ratio error]
     """
 
+    assert k <= n, f"denominator {n} found to be smaller than numerator {k} when calculating interval."
+
     from scipy.stats import beta
     k = float(k)
     n = float(n)
-    p = (k/n) if n > 0 else 0
 
     alpha = (1 - conf)
-    up = 1 if k == n else 1 - beta.ppf(alpha/2, n-k, k+1)
-    down = 0 if k == 0 else 1 - beta.ppf(1-alpha/2, n-k+1, k)
+    # if (0,0) is passed, then there is no need to perform any calculation.
+    if n == 0:
+        p = 0
+        up = 0
+        down = 0
+    else:
+        p = k/n
+        up = 1 if k == n else 1 - beta.ppf(alpha/2, n-k, k+1)
+        down = 0 if k == 0 else 1 - beta.ppf(1-alpha/2, n-k+1, k)
 
     result = (p, p-down, up-p)
+
     return result
 
 
