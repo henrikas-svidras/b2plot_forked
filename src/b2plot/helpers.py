@@ -7,9 +7,9 @@ Helper function and classes are defined here.
 import b2plot
 # from .functions import bar
 
-
 import matplotlib.pyplot as plt
 import numpy as np
+
 
 def hist2root(h, name=None, title=''):
     """ Convert your histograms to a root histogram.. if you really want to
@@ -169,9 +169,9 @@ def draw_colz(values, xedges, yedges, errup, errdown,
         fig, ax = plt.subplots(1, 1, figsize=(12, 10))
     fig = plt.gcf()
 
-    if cmap=='sequential':
+    if cmap == 'sequential':
         cmap = 'rocket'
-    elif cmap=='diverging':
+    elif cmap == 'diverging':
         cmap = 'coolwarm'
     elif isinstance(cmap, str):
         cmap = cmap

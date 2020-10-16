@@ -313,7 +313,7 @@ def errorhist(data, bins=None, color=None, normed=False, density=False, fmt='.',
 
     if density:
         yom, x = np.histogram(data, xaxis, weights=weights)
-        err = (np.sqrt(np.array(yom)) *(y/yom), np.sqrt(np.array(yom)) * (y/yom))
+        err = (np.nan_to_num(np.sqrt(np.array(yom)) *(y/yom)), np.nan_to_num(np.sqrt(np.array(yom)) * (y/yom)))
     if x_err is not False or box:
         x_err = (x[1]-x[0])/2.0
     else:
@@ -353,6 +353,9 @@ def errorbar(bin_centers, y, y_err, x_err=None, box=False, plot_zero=True, fmt='
     if len(y_err) != 2:
         y_err = y_err, y_err
 
+    if isinstance(color, int):
+        color = b2cm[color % len(b2cm)]
+        
     if color is None:
         color = next(ax._get_lines.prop_cycler)["color"]
 
@@ -421,3 +424,9 @@ def profile(x, y, bins=None, range=None, fmt='.', *args, **kwargs):
 
     bin_centers = (xaxis[:-1] + xaxis[1:]) / 2.
     return plt.errorbar(x=bin_centers, y=means, yerr=std, linestyle='none', fmt=fmt, *args, **kwargs)
+
+
+def bc(b):
+    """ return bin centers
+    """
+    return (b[1:] + b[:-1])/2
