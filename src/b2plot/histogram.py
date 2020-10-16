@@ -7,6 +7,7 @@ In this file all the histogram related functions.
 
 from .helpers import get_optimal_bin_size, TheManager
 from .colors import b2cm
+from .functions import remove_nans, clip_data
 import pandas as pd
 import numpy as np
 from matplotlib.colors import hex2color
@@ -56,7 +57,7 @@ STYLES_hatches = [None, '///', r"\\\ ",  'xxx', '--', '++', 'o', ".+", 'xx', '//
 
 
 def hist(data, bins=None, fill=False, range=None, lw=1., ax=None, style=None, color=None, scale=None, weights=None,
-         label=None, edgecolor=None, fillalpha=0.5, *args, **kwargs):
+         label=None, edgecolor=None, fillalpha=0.5, paint_uoflow=False, *args, **kwargs):
     """
 
     Args:
@@ -70,6 +71,7 @@ def hist(data, bins=None, fill=False, range=None, lw=1., ax=None, style=None, co
         color:
         scale:
         weights:
+        paint_uoflow: draw u/oflow content in first/last visible bin. Requires bins to be an iterable.
         *args:
         **kwargs:
 
@@ -77,13 +79,19 @@ def hist(data, bins=None, fill=False, range=None, lw=1., ax=None, style=None, co
 
     """
 
-    if ax is None:
-        ax = plt.gca()
-
-    xaxis = _hist_init(data, bins, xrange=range)
-
     if type(data) is pd.Series:
         data = data.values
+
+    if type(weights) is pd.Series:
+        weights = weights.values
+
+    data, weights = remove_nans(data, weights)
+
+    if weights is None:
+        weights = np.ones(len(data))
+
+    if ax is None:
+        ax = plt.gca()
 
     if isinstance(color, int):
         color = b2cm[color % len(b2cm)]
@@ -102,9 +110,6 @@ def hist(data, bins=None, fill=False, range=None, lw=1., ax=None, style=None, co
     else:
         style = 0
 
-    if weights is None:
-        weights = np.ones(len(data))
-
     if scale is not None:
         if isinstance(scale, int) or isinstance(scale, float):
             if not isinstance(scale, bool):
@@ -113,6 +118,11 @@ def hist(data, bins=None, fill=False, range=None, lw=1., ax=None, style=None, co
             print("Please provide int or float with scale")
 
     edgecolor = color if edgecolor is None else edgecolor
+
+    if paint_uoflow:
+        data = clip_data(data, bins=bins, x_range=range)
+
+    xaxis = _hist_init(data, bins, xrange=range)
 
     if fill:
         # edgecolor = 'black' if style == 0 else color
@@ -163,7 +173,7 @@ def to_stack(df, col, by, transform=None, get_cats=False):
 
 
 def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=None, edgecolor='black', weights=None,
-            scale=None, label=None, transform=None, *args, **kwargs):
+            scale=None, label=None, transform=None, paint_uoflow=False, *args, **kwargs):
     """ Create stacked histogram
 
     Args:
@@ -192,6 +202,8 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
         assert isinstance(df, list), "Please provide DataFrame or List"
         (data, labels) = (df,[None])
 
+    data, weights = remove_nans(data, weights, stacked=True)
+
     if ax is None:
         ax = plt.gca()
 
@@ -200,6 +212,12 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
         n_stacks = len(data)
         if n_stacks < 20:
             color = b2helix(n_stacks)
+
+    if paint_uoflow:
+        data = [clip_data(d, bins=bins, x_range=range) for d in data]
+
+    # Make sure data is a Python list at this point.
+    assert isinstance(data, list), f"'data' should be a list(np.array), but now it is of type: {type(data)}"
 
     if weights is None:
         weights = []
@@ -219,14 +237,15 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
     xaxis = _hist_init(data[0], bins, xrange=range)
 
     y, xaxis, stuff = ax.hist(data, xaxis, histtype='stepfilled',
-                          lw=lw, color=color, edgecolor=edgecolor, stacked=True, weights=weights, label=label, *args, **kwargs)
+                              lw=lw, color=color, edgecolor=edgecolor, stacked=True, weights=weights, label=label, *args, **kwargs)
 
     TheManager.Instance().set_x_axis(xaxis)
+
     return y[-1], xaxis, stuff  # dangerous list index
 
 
 def errorhist(data, bins=None, color=None, normed=False, density=False, fmt='.', range=None, scale=None,
-              x_err=False, box=False, ax=None, weights=None, plot_zero=True, label=None, *args, **kwargs):
+              x_err=False, box=False, ax=None, weights=None, plot_zero=True, label=None, paint_uoflow=False, *args, **kwargs):
     """ Histogram as error bar
 
     Args:
@@ -251,16 +270,16 @@ def errorhist(data, bins=None, color=None, normed=False, density=False, fmt='.',
 
     """
 
-    xaxis = _hist_init(data, bins, xrange=range)
-
-    if ax is None:
-        ax = plt.gca()
-
     if type(data) is pd.Series:
         data = data.values
 
+    data, weights = remove_nans(data, weights)
+
     if weights is None:
         weights = np.ones(len(data))
+
+    if ax is None:
+        ax = plt.gca()
 
     if scale is not None:
         if isinstance(scale, int) or isinstance(scale, float):
@@ -271,13 +290,18 @@ def errorhist(data, bins=None, color=None, normed=False, density=False, fmt='.',
     else:
         scale = 1
 
+    if paint_uoflow:
+        data = clip_data(data, bins=bins, x_range=range)
+
     if (normed and density) or normed:
-      print('normed is deprecated and changed by density. Your call has been changed to density=True automatically.')
-      density=True
+        print('normed is deprecated and changed by density. Your call has been changed to density=True automatically.')
+        density=True
+
+    xaxis = _hist_init(data, bins, xrange=range)
 
     y, x = np.histogram(data, xaxis, density=density, weights=weights)
 
-    # https://www-cdf.fnal.gov/physics/statistics    
+    # https://www-cdf.fnal.gov/physics/statistics
     err = (-0.5 + np.sqrt(np.array(y*scale + 0.25)), +0.5 + np.sqrt(np.array(y*scale + 0.25)))  # np.sqrt(np.array(y))
     bin_centers = (x[1:] + x[:-1]) / 2.0
 
