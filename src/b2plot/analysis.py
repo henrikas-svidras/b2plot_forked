@@ -65,12 +65,14 @@ def ratio(y1, y2, y1_err=None, y2_err= None):
         ratio, ratio_error
 
     """
+
     assert len(y1) == len(y2), "y1 and y2 length does not match"
     y1e = np.sqrt(y1) if y1_err is None else y1_err
     y2e = np.sqrt(y2) if y2_err is None else y2_err
-    r = y1/y2
-    re = np.sqrt((y1/(1.0*y2*y2))*(y1/(1.0*y2*y2))*y2e*y2e+(1/(1.0*y2))*(1/(1.0*y2))*y1e*y1e)
-    return r, re
+    with np.errstate(divide="ignore", invalid="ignore"):
+        r = y1/y2
+        re = np.sqrt((y1/(1.0*y2*y2))*(y1/(1.0*y2*y2))*y2e*y2e+(1/(1.0*y2))*(1/(1.0*y2))*y1e*y1e)
+        return r, re
 
 
 def divide_efficiency(n_nom, n_denom, confidence=0.683):
@@ -267,6 +269,46 @@ def pur_eff(x, mask, nbins=None, reverse_too=False):
     return eff, pur,pur_err, eff_err
 
 
+def fpr_tpr(x, mask, nbins=None):
+    """ Plots the distribution x in an equal frequency binning with the purity regarding mask
+
+    Args:
+        x: Distribution or signal distribution
+        mask: Boolean mask or background distribution
+        nbins: Number of bins for the internal calculation (if None, optimal value is calculated)
+
+    Returns:
+        fpr, tpr: False positive rate, True positive rate
+    """
+    if len(pd.unique(mask)) > 2:
+        # if signal and background distribution are given as x and mask
+        x, mask = bp.analysis.mask_append(x, mask)
+
+    nbins = optimal_bin_size(len(x)) if nbins is None else nbins
+
+    x = x[np.isfinite(x)]
+    bins = np.percentile(x, np.linspace(0, 100, nbins))
+
+    y_, _ = np.histogram(x, bins)
+    y_1, _ = np.histogram(x[mask], bins)
+    y_0, _ = np.histogram(x[~mask], bins)
+
+    pur = y_1 / (y_1 + y_0)
+    ps = np.argsort(pur)
+
+    # Sort by purity
+    y1 = y_1[ps]
+    y0 = y_0[ps]
+
+    tp = np.cumsum(y1[::-1])[::-1]
+    fp = np.cumsum(y0[::-1])[::-1]
+    fn = y1.cumsum()
+    tn = y0.cumsum()
+    tpr = tp/(tp+fn)
+    fpr = fp/(tn+fp)
+    return fpr, tpr
+
+    
 def purity_hist(x, mask, nbins=10, do_plot=True, figsize=None, xticks_fontsize=None, ax=None):
     """ Plots the distribution x in an equal frequency binning with the purity regarding mask
 
@@ -288,7 +330,7 @@ def purity_hist(x, mask, nbins=10, do_plot=True, figsize=None, xticks_fontsize=N
 
     x = x[np.isfinite(x)]
     bins = np.percentile(x, np.linspace(0, 100, nbins))
-
+ 
     y_, _ = np.histogram(x, bins)
     y_1, _ = np.histogram(x[mask], bins)
     y_0, _ = np.histogram(x[~mask], bins)

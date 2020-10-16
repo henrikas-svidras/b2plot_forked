@@ -26,7 +26,7 @@ The matolotlib style can be installed in the sytlelib folder:
 
 ```bash
 
-./install_mlp_style.sh
+./stylelib/install_mlp_style.sh
 
 ```
 
@@ -44,7 +44,7 @@ plt.style.use('belle2')
 
 ```
 
-  
+
 One of the main features is the `hist` function, which can be used like matplotlib analogon, but has additional features, such as remembering the x-axis binning.
 
 
@@ -101,5 +101,3 @@ bp.stacked(df, col="mass", by='exp', bins=50,)
 
 
 ![Example](examples/stacked_plot.png?raw=true "Title")
-
-

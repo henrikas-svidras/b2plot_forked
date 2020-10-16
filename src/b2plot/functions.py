@@ -1,30 +1,50 @@
- # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 In this file all the matplolib wrappers are located.
 
 """
 
-from .helpers import get_optimal_bin_size, TheManager
-from .colors import b2cm
-import pandas as pd
 import numpy as np
-from matplotlib.colors import hex2color
-
 import matplotlib.pyplot as plt
 
 
-def text(t, x=0.8, y=0.9, fontsize=22, *args, **kwargs):
+def remove_nans(data, weights=None, stacked=False):
+    """
+    Remove NaN elements in data array, and corresponding weights too.
     """
 
-    :param t:
-    :param x:
-    :param y:
-    :param fontsize:
-    :param args:
-    :param kwargs:
-    :return:
+    if not stacked:
+        data_new = data[~np.isnan(data)]
+    else:
+        data_new = [d[~np.isnan(d)] for d in data]
+    weights_new = None
+    if weights is not None:
+        if not stacked:
+            weights_new = weights[~np.isnan(data)]
+        else:
+            weights_new = [w[~np.isnan(data[idx])] for idx, w in enumerate(weights)]
+
+    return data_new, weights_new
+
+
+def clip_data(data, bins=None, x_range=None):
     """
-    plt.text(x, y, t, transform=plt.gca().transAxes, fontsize=fontsize, *args, **kwargs)
+    Clip np.array at first, last = x_range
+    Use when merging under/overflow into first/last visible bin.
+    """
+
+    first = last = None
+    if isinstance(x_range, tuple):
+        first, last = x_range
+    if isinstance(bins, np.ndarray):
+        first, last = bins.flat[0], bins.flat[-1]
+    if isinstance(bins, list):
+        first, last = bins[0], bins[-1]
+
+    if first is not None and last is not None:
+        return np.clip(data, first, last)
+
+    return data
 
 
 def xlim(low=None, high=None, ax=None):
@@ -78,5 +98,3 @@ bbox_inches='tight',
     """
     plt.subplots_adjust(bottom=bottom, left=left, right=right, top=top)
     plt.savefig(filename,  *args, **kwargs)
-
-
