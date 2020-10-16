@@ -191,7 +191,7 @@ def data_mc_ratio(data, mc, label_data='Data', label_mc="MC",
 def mask_append(xs,xb):
     """ Merge xs and xb into one vector and return it with a boolean mask for each category
     """
-    return np.append(xs,xb), np.append(np.ones(len(xs)), np.zeros(len(xb)))==1
+    return np.append(xs,xb), np.append(np.ones(len(xs)), np.zeros(len(xb))) == 1 
 
 
 def pur_eff_cont(x, mask):
@@ -233,6 +233,7 @@ def pur_eff(x, mask, nbins=None, reverse_too=False):
 
     x = x[np.isfinite(x)]
     bins = np.percentile(x, np.linspace(0, 100, nbins))
+    assert np.std(bins) > 0, "The variable contains no information"
 
     y_, _ = np.histogram(x, bins)
     y_1, _ = np.histogram(x[mask], bins)
@@ -282,31 +283,48 @@ def fpr_tpr(x, mask, nbins=None):
     """
     if len(pd.unique(mask)) > 2:
         # if signal and background distribution are given as x and mask
-        x, mask = bp.analysis.mask_append(x, mask)
+        x, mask = mask_append(x, mask)
 
     nbins = optimal_bin_size(len(x)) if nbins is None else nbins
 
     x = x[np.isfinite(x)]
     bins = np.percentile(x, np.linspace(0, 100, nbins))
+    if np.std(bins) == 0.0:
+        print("Warning, no information in feature")
+        return np.array([1, 0]), np.array([1, 0])
 
     y_, _ = np.histogram(x, bins)
     y_1, _ = np.histogram(x[mask], bins)
     y_0, _ = np.histogram(x[~mask], bins)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        pur = y_1 / (y_1 + y_0)
 
-    pur = y_1 / (y_1 + y_0)
     ps = np.argsort(pur)
+    m = ~np.isnan(pur[ps])
 
     # Sort by purity
-    y1 = y_1[ps]
-    y0 = y_0[ps]
-
+    y1 = y_1[ps][m]
+    y0 = y_0[ps][m]
     tp = np.cumsum(y1[::-1])[::-1]
     fp = np.cumsum(y0[::-1])[::-1]
     fn = y1.cumsum()
     tn = y0.cumsum()
     tpr = tp/(tp+fn)
     fpr = fp/(tn+fp)
-    return fpr, tpr
+    return np.concatenate(([1], fpr,[0]), axis=None), np.concatenate(([1], tpr,[0]), axis=None)
+
+
+def purity_auc(x, mask, nbins=None):
+    """Calculate Area Under Curve (auc) betwen signal and background distribution, based on pdf purity
+    Args:
+        x: Distribution or signal distribution
+        mask: Boolean mask or background distribution
+        nbins: Number of bins for the internal calculation (if None, optimal value is calculated)  
+    Retruns:
+        auc score
+    """
+    from sklearn.metrics import auc
+    return auc(*fpr_tpr(x, mask, nbins=None))
 
     
 def purity_hist(x, mask, nbins=10, do_plot=True, figsize=None, xticks_fontsize=None, ax=None):
@@ -330,13 +348,16 @@ def purity_hist(x, mask, nbins=10, do_plot=True, figsize=None, xticks_fontsize=N
 
     x = x[np.isfinite(x)]
     bins = np.percentile(x, np.linspace(0, 100, nbins))
- 
-    y_, _ = np.histogram(x, bins)
-    y_1, _ = np.histogram(x[mask], bins)
-    y_0, _ = np.histogram(x[~mask], bins)
+    assert np.std(bins) > 0, "The variable contains no information"
 
-    pur = y_1 / (y_1 + y_0)
-    pur_err = (pur * (1 - pur)) / (y_)    
+    y_, _ = np.histogram(x, bins)
+
+    y_1, _ = np.histogram(x[mask], bins)
+
+    y_0, _ = np.histogram(x[~mask], bins)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        pur = y_1 / (y_1 + y_0)
+        pur_err = (pur * (1 - pur)) / (y_)    
 
     if do_plot:
         x_ = np.arange(len(y_) + 1)
