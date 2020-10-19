@@ -6,6 +6,7 @@ In this file all the matplolib wrappers are located.
 
 import numpy as np
 import matplotlib.pyplot as plt
+from .helpers import TheManager
 
 
 def remove_nans(data, weights=None, stacked=False):

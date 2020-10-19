@@ -37,7 +37,7 @@ def corrmatrix(corr, separate_first=0, x_label_rot=45, invert_y=True, label_font
         plt.axvline(separate_first, color='gray',lw=1)
 
 
-def flat_correlation(x,y, nbins='auto', zoom=1, nlabels=5, ax=None, ax_fmt='%.2e', x_label_rot=45, invert_y=True, draw_labels=True, get_im=False, cmap='jet'):
+def flat_correlation(x,y, nbins='auto', zoom=1, nlabels=5, ax=None, ax_fmt='%.2e', x_label_rot=45, invert_y=True, draw_labels=True, get_im=False, cmap='jet', ):
     """ Calculate and plot a 2D correlation in flat binning.
     This function calculates an equal frequency binning for x and y and fills a 2D histogram with this binning.
     Thus each slice in x and y contains the same number of entries for continuus distributions.
@@ -81,7 +81,7 @@ def flat_correlation(x,y, nbins='auto', zoom=1, nlabels=5, ax=None, ax_fmt='%.2e
     m_exp = (beta.T*(m1).astype(float)).T*(m0).astype(float)
     m_stat = m_exp**0.5
     
-    a = (a0-m_exp)/m_stat
+    a = (a0-m_exp)/(np.sqrt(a0)+m_stat)
 
     a[a0==0] = None
     # Plotting
@@ -90,6 +90,7 @@ def flat_correlation(x,y, nbins='auto', zoom=1, nlabels=5, ax=None, ax_fmt='%.2e
     # set labels
     if draw_labels:
         cbar = plt.colorbar(im,fraction=0.046, pad=0.04, ax=ax)
+        cbar.set_label("$\sigma$ ", rotation=0)
         ax.set_xticks(np.linspace(*ax.get_xlim(), nlabels))
         ax.set_xticklabels([ax_fmt%f for f in np.percentile(x, np.linspace(0,100, nlabels))], rotation=x_label_rot, ha='right')
         ax.set_yticks(np.linspace(*ax.get_ylim(), nlabels))
@@ -102,14 +103,15 @@ def flat_correlation(x,y, nbins='auto', zoom=1, nlabels=5, ax=None, ax_fmt='%.2e
         ax.set_xticklabels([])
         ax.set_yticklabels([])
     # Calculate chi2 probability
-    flat_probability = stats.distributions.chi2.sf(np.nansum(a*a),(nbins)**2-(nbins-1)-(nbins-1)-1)
+    dim = (nbins)**2-(nbins-1)-(nbins-1)-1
+    flat_probability = stats.distributions.chi2.sf(np.nansum(a*a), dim)
 
     if invert_y:
         ax.invert_yaxis()
 
     if get_im:
         return im
-    return  flat_probability
+    return flat_probability
 
 
 def flat_corr_matrix(df, pdf=None, tight=False, labels=None, label_size=None, size=12, n_labels=3, 
