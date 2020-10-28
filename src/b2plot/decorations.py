@@ -72,7 +72,7 @@ def watermark(t=None,logo="Belle II", px=0.5, py=0.92, transform=plt.gca().trans
     plt.text(px, py, logo, ha='center',
              transform=transform,
              fontsize=fontsize,
-             style=bstyle,
+#             style=bstyle,
              alpha=alpha_logo,
              weight='bold',
              *args, **kwargs,
@@ -89,7 +89,7 @@ def watermark(t=None,logo="Belle II", px=0.5, py=0.92, transform=plt.gca().trans
              )
 
 
-def lumi(l="$5\; pb^{-1}$", px=0.75, py=0.85, transform=plt.gca().transAxes):
+def lumi(l="$5\; pb^{-1}$", px=0.75, py=0.85, transform=plt.gca().transAxes, *args, **kwargs):
     plt.text(px, py, "$\int\,L\,\mathrm{dt}\;=\;$" + l, transform=transform, *args, **kwargs)
 
 
