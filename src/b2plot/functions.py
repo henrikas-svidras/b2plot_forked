@@ -8,6 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from .helpers import TheManager
 
+from .helpers import TheManager
+
 
 def remove_nans(data, weights=None, stacked=False):
     """
@@ -59,7 +61,9 @@ def xlim(low=None, high=None, ax=None):
     Returns:
 
     """
+
     xaxis = TheManager.Instance().get_x_axis()
+
     if xaxis is not None:
         if ax is None:
             ax = plt.gca()

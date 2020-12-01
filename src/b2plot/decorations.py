@@ -48,7 +48,7 @@ def draw_y_label(label='Entries', unit=None, ha='right', brackets=True,ax=None, 
 
 
 
-def watermark(t=None,logo="Belle II", px=0.5, py=0.92, transform=plt.gca().transAxes, fontsize=16, alpha=0.7, alpha_logo=0.95, shift=0.08,  *args, **kwargs):
+def watermark(t=None,logo="Belle II", px=0.5, py=0.92, transform=plt.gca().transAxes, fontsize=16, alpha=0.7, alpha_logo=0.95, shift=0.08, bstyle="italic", ha="left", *args, **kwargs):
     """
 
     Args:
@@ -69,7 +69,7 @@ def watermark(t=None,logo="Belle II", px=0.5, py=0.92, transform=plt.gca().trans
         import datetime
         t = " %d (internal)" % datetime.date.today().year
 
-    plt.text(px, py, logo, ha='center',
+    plt.text(px, py, logo, ha=ha,
              transform=transform,
              fontsize=fontsize,
 #             style=bstyle,
@@ -79,7 +79,7 @@ def watermark(t=None,logo="Belle II", px=0.5, py=0.92, transform=plt.gca().trans
              # fontproperties=font,
              # bbox={'facecolor':'#377eb7', 'alpha':0.1, 'pad':10}
              )
-    plt.text(px + shift, py, t, ha='left',
+    plt.text(px + shift, py, t, ha=ha,
              transform=transform,
              fontsize=fontsize,
              #          style='italic',
