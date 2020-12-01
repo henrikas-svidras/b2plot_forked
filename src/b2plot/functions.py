@@ -6,7 +6,6 @@ In this file all the matplolib wrappers are located.
 
 import numpy as np
 import matplotlib.pyplot as plt
-from .helpers import TheManager
 
 from .helpers import TheManager
 
