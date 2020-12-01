@@ -1,7 +1,7 @@
  # -*- coding: utf-8 -*-
+
 """
 In this file all the histogram related functions.
-
 """
 
 
@@ -156,6 +156,7 @@ def to_stack(df, col, by, transform=None, get_cats=False):
     Returns:
 
     """
+
     g = df.groupby(by)
     transform = _notransform if transform is None else transform
     x_data = []
@@ -172,8 +173,7 @@ def to_stack(df, col, by, transform=None, get_cats=False):
     return [x_data[i] for i in inds]
 
 
-def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=None, edgecolor='black', weights=None,
-            scale=None, label=None, transform=None, paint_uoflow=False, *args, **kwargs):
+def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=None, edgecolor='black', weights=None, scale=None, label=None, transform=None, paint_uoflow=False, *args, **kwargs):
     """ Create stacked histogram
 
     Args:
@@ -195,6 +195,7 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
         assert by is not None, "Please provide by"
 
         data, cats = to_stack(df, col, by, transform, get_cats=True)
+
         if label is None:
             label = cats
 
@@ -241,7 +242,10 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
 
     TheManager.Instance().set_x_axis(xaxis)
 
-    return y[-1], xaxis, stuff  # dangerous list index
+    if (isinstance(y, list) and len(y) > 1) or (isinstance(y, np.ndarray) and y.ndim > 1):
+        return y[-1], xaxis, stuff  # The last array is the top stack.
+    else:
+        return y, xaxis, stuff
 
 
 def errorhist(data, bins=None, color=None, normed=False, density=False, fmt='.', range=None, scale=None,
@@ -323,7 +327,7 @@ def errorhist(data, bins=None, color=None, normed=False, density=False, fmt='.',
 
     TheManager.Instance().set_x_axis(xaxis)
 
-    return y, bin_centers, err
+    return y, xaxis, bin_centers, err
 
 
 def errorbar(bin_centers, y, y_err, x_err=None, box=False, plot_zero=True, fmt='.',
@@ -355,7 +359,7 @@ def errorbar(bin_centers, y, y_err, x_err=None, box=False, plot_zero=True, fmt='
 
     if isinstance(color, int):
         color = b2cm[color % len(b2cm)]
-        
+
     if color is None:
         color = next(ax._get_lines.prop_cycler)["color"]
 
