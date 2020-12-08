@@ -404,7 +404,7 @@ def bar(y, binedges, ax=None, *args, **kwargs):
     return ax.hist(x, bins=binedges, weights=y, *args, **kwargs)
 
 
-def profile(x, y, bins=None, range=None, fmt='.', *args, **kwargs):
+def profile(x, y, bins=None, range=None, fmt='.', ax=None, *args, **kwargs):
     """ Profile plot of x vs y; the mean and std of y in bins of x as errorbar
 
     Args:
@@ -421,13 +421,16 @@ def profile(x, y, bins=None, range=None, fmt='.', *args, **kwargs):
     """
     import scipy
 
+    if ax is None:
+        ax = plt.gca()
+
     xaxis = _hist_init(x, bins, xrange=range)
 
     means = scipy.stats.binned_statistic(x, y, bins=xaxis, statistic='mean').statistic
     std = scipy.stats.binned_statistic(x, y, bins=xaxis, statistic=scipy.stats.sem).statistic
 
     bin_centers = (xaxis[:-1] + xaxis[1:]) / 2.
-    return plt.errorbar(x=bin_centers, y=means, yerr=std, linestyle='none', fmt=fmt, *args, **kwargs)
+    return ax.errorbar(x=bin_centers, y=means, yerr=std, linestyle='none', fmt=fmt, *args, **kwargs)
 
 
 def bc(b):
