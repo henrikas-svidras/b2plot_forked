@@ -114,7 +114,7 @@ class TheManager:
     def add_replot(self, h):
         self.toreplot.append(h)
 
-    def replot(self, ecolor='black'):
+    def  replot(self, ecolor='black'):
         for h in self.toreplot:
 
             b2plot.bar(h[0], h[1], lw=1, histtype='step', color='black' )
@@ -140,6 +140,7 @@ def replot():
 
 
 def draw_colz(values, xedges, yedges, errup, errdown,
+              second_errup=None, second_errdown=None,
               XName='X', YName='Y',
               cbarName='efficiency',
               col_min=None, col_max=None,
@@ -170,7 +171,7 @@ def draw_colz(values, xedges, yedges, errup, errdown,
     fig = plt.gcf()
 
     if cmap == 'sequential':
-        cmap = 'rocket'
+        cmap = 'plasma'
     elif cmap == 'diverging':
         cmap = 'coolwarm'
     elif isinstance(cmap, str):
@@ -199,10 +200,24 @@ def draw_colz(values, xedges, yedges, errup, errdown,
                 # This draw position and size might need some tweaking in the future.
                 draw_position = (x+np.abs(x-xedges[ix+1])/2,
                                  y+np.abs(y-yedges[iy+1])/2.)
-                size_points = 80*(np.abs(x-xedges[ix+1]))/np.abs(xedges[0]-xedges[-1])
-                ax.annotate(f'${ratio:.3f}\pm^{{{err_up:.3f}}}_{{{err_down:.3f}}}$',
-                            draw_position,
-                            ha='center', va='center', size=size_points)
+                if second_errup is not None or second_errdown is not None:
+                    second_err_up = 0
+                    second_err_down = 0
+                    if second_errup is not None:
+                        second_err_up = second_errup[ix][iy]
+                    if second_errdown is not None:
+                        second_err_down = second_errdown[ix][iy]
+
+                    size_points = 50*(np.abs(x-xedges[ix+1]))/np.abs(xedges[0]-xedges[-1])
+                    ax.annotate(f'${ratio:.3f}\pm^{{{err_up:.3f}}}_{{{err_down:.3f}}}\pm^{{{second_err_up:.3f}}}_{{{second_err_down:.3f}}}$',
+                                draw_position,
+                                ha='center', va='center', size=size_points)
+                else:
+                    size_points = 80*(np.abs(x-xedges[ix+1]))/np.abs(xedges[0]-xedges[-1])
+                    ax.annotate(f'${ratio:.3f}\pm^{{{err_up:.3f}}}_{{{err_down:.3f}}}$',
+                                draw_position,
+                                ha='center', va='center', size=size_points)
+
 
     ax.set_xlabel(XName)
     ax.set_ylabel(YName)

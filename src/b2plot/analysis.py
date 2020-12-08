@@ -75,13 +75,14 @@ def ratio(y1, y2, y1_err=None, y2_err= None):
         return r, re
 
 
-def divide_efficiency(n_nom, n_denom, confidence=0.683):
+def divide_efficiency(n_nom, n_denom, confidence=0.683, scale=None):
     """ divides two histograms for an efficiency calculation
 
     Args:
         n_nom: y values of nominator histogram (1d or 2d)
         n_denom: y values of denominator histogram  (1d or 2d)
         confidence: (optional) confidence level, by default 0.683
+        scale: (optional, float) if your n_nom and n_denom have previously been scaled, you specify the scale here.
 
     Returns:
         ratio, [lower ratio error, upper ratio error]
@@ -91,10 +92,14 @@ def divide_efficiency(n_nom, n_denom, confidence=0.683):
     flattened_n_nom = n_nom.flatten()
     flattened_n_denom = n_denom.flatten()
 
+    if scale is not None:
+        #"descaling"
+        flattened_n_nom /= scale
+        flattened_n_denom /= scale
+
     rat = []
     err_down = []
     err_up = []
-
     for passes, counts in zip(flattened_n_nom, flattened_n_denom):
         bin_ratio = exact_CI(passes, counts, conf=confidence)
         rat.append(bin_ratio[0])
