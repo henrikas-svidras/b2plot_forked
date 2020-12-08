@@ -302,7 +302,8 @@ def errorhist(data, bins=None, color=None, normed=False, density=False, fmt='.',
     y, x = np.histogram(data, xaxis, density=density, weights=weights)
 
     # https://www-cdf.fnal.gov/physics/statistics
-    err = (-0.5 + np.sqrt(np.array(y*scale + 0.25)), +0.5 + np.sqrt(np.array(y*scale + 0.25)))  # np.sqrt(np.array(y))
+    err = (-0.5*scale + np.sqrt(np.array((y + 0.25)*scale)), +0.5*scale + np.sqrt(np.array((y + 0.25)*scale)))  # np.sqrt(np.array(y))
+    # err = np.sqrt(np.array(y))
     bin_centers = (x[1:] + x[:-1]) / 2.0
 
     if isinstance(color, int):

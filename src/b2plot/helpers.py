@@ -114,7 +114,7 @@ class TheManager:
     def add_replot(self, h):
         self.toreplot.append(h)
 
-    def replot(self, ecolor='black'):
+    def  replot(self, ecolor='black'):
         for h in self.toreplot:
 
             b2plot.bar(h[0], h[1], lw=1, histtype='step', color='black' )
