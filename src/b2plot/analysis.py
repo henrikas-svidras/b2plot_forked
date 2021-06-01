@@ -10,6 +10,7 @@ import b2plot
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy import stats
 from .histogram import _hist_init, to_stack, hist, get_xaxis
 from .functions import xlim
 
@@ -118,16 +119,15 @@ def exact_CI(k, n, conf=0.683):
 
     Args:
         k: number of passes ("numerator of proportion")
-        n: total sample size ("denominator of proportion")
+        n: number of trials ("denominator of proportion")
         conf: (optional) confidence level, by default 0.683
 
     Returns:
-        ratio, [upper ratio error, lower ratio error]
+        ratio, [lower ratio error, upper ratio error]
     """
 
     assert k <= n, f"denominator {n} found to be smaller than numerator {k} when calculating interval."
 
-    from scipy.stats import beta
     k = float(k)
     n = float(n)
 
@@ -139,8 +139,8 @@ def exact_CI(k, n, conf=0.683):
         down = 0
     else:
         p = k/n
-        up = 1 if k == n else 1 - beta.ppf(alpha/2, n-k, k+1)
-        down = 0 if k == 0 else 1 - beta.ppf(1-alpha/2, n-k+1, k)
+        up = 1 if k == n else 1-scipy.beta.ppf(alpha/2, n-k, k+1)
+        down = 0 if k == 0 else 1-scipy.beta.ppf(1-alpha/2, n-k+1, k)
 
     result = (p, p-down, up-p)
 
