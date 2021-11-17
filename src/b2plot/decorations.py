@@ -48,7 +48,7 @@ def draw_y_label(label='Entries', unit=None, ha='right', brackets=True,ax=None, 
 
 
 
-def watermark(t=None,logo="Belle II", px=0.5, py=0.92, transform=plt.gca().transAxes, fontsize=16, alpha=0.7, alpha_logo=0.95, shift=0.08, bstyle="italic", ha="left", *args, **kwargs):
+def watermark(t=None,logo="Belle II", px=0.5, py=0.92, transform=None, fontsize=16, alpha=0.7, alpha_logo=0.95, shift=0.08, bstyle="italic", ha="left", *args, **kwargs):
     """
 
     Args:
@@ -68,6 +68,8 @@ def watermark(t=None,logo="Belle II", px=0.5, py=0.92, transform=plt.gca().trans
     if t is None:
         import datetime
         t = " %d (internal)" % datetime.date.today().year
+    if transform is None:
+        transform = plt.gca().transAxes
 
     plt.text(px, py, logo, ha=ha,
              transform=transform,
@@ -89,11 +91,15 @@ def watermark(t=None,logo="Belle II", px=0.5, py=0.92, transform=plt.gca().trans
              )
 
 
-def lumi(l="$5\; pb^{-1}$", px=0.75, py=0.85, transform=plt.gca().transAxes, *args, **kwargs):
+def lumi(l="$5\; pb^{-1}$", px=0.75, py=0.85, transform=None, *args, **kwargs):
+    if transform is None:
+        transform = plt.gca().transAxes
     plt.text(px, py, "$\int\,L\,\mathrm{dt}\;=\;$" + l, transform=transform, *args, **kwargs)
 
 
-def text(t, px=0.033, py=0.763, *args, **kwargs):
+def text(t, px=0.033, py=0.763, transform=None, *args, **kwargs):
+    if transform is None:
+        transform = plt.gca().transAxes
     plt.text(px, py, t, transform=plt.gca().transAxes, *args, **kwargs)
 
 

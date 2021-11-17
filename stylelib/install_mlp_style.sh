@@ -10,7 +10,7 @@ read answer
 
 if [ "$answer" != "${answer#[Yy]}" ] ;then
     mkdir -p  $INSTALL_FOLDER
-    cp ./stylelib/belle2*.mplstyle $INSTALL_FOLDER
+    cp ./belle2*.mplstyle $INSTALL_FOLDER
 else
     echo You can also create a sym-link:
     echo ln -s ./stylelib/belle2*.mplstyle $INSTALL_FOLDER

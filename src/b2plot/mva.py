@@ -6,7 +6,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from .helpers import nf
 from .histogram import to_stack, errorhist
-from .decorations import decorate
 from .analysis import sig_bkg_plot
 from .colors import cm
 from .analysis import mask_append
@@ -39,7 +38,6 @@ def mva_input_plot(x_sig, x_bkg, density=True, log=False, *args, **kwargs):
     sns.boxplot(x=x, y=y,  orient='h', ax=axes[1], palette=cm(2)[::-1],linewidth=1,fliersize=1)
     axes[1].set_yticks([])
     return axes
-    # decorate(xlabel)
 
 
 def plot_features(df, variables, condition, *args, **kwargs):
