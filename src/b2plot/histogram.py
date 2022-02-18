@@ -320,7 +320,7 @@ def errorhist(data, bins=None, color=None, normed=False, density=False, fmt='.',
         yom, x = np.histogram(data, xaxis, weights=weights)
         err = (np.nan_to_num(np.sqrt(np.array(yom)) *(y/yom)), np.nan_to_num(np.sqrt(np.array(yom)) * (y/yom)))
     if x_err is not False or box:
-        x_err = (x[1]-x[0])/2.0
+        x_err = (x[1:]-x[:-1])/2.0
     else:
         x_err = None
 
