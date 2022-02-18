@@ -147,18 +147,18 @@ def labels(xlabel=None, ylabel=None, unit=None, root_style=False, brackets=True,
                 pass
 
     if xlabel is not None:
-        ax.set_xlabel(xlabel, horizontalalignment=ha, x=x, *args, **kwargs)
+        ax.set_xlabel(xlabel, ha=ha, x=x, *args, **kwargs)
 
-    if unit is not None:
-        if unit is not '':
+    if unit:
+        if unit != '':
             ax.set_xlabel(xlabel + br_open + unit + br_close, ha=ha, x=x, *args, **kwargs)
         if ylabel is not None:
-            draw_y_label(ylabel, unit,  horizontalalignment=ha, y=y, brackets=brackets, ax=ax, *args, **kwargs)
+            draw_y_label(ylabel, unit,  ha=ha, y=y, brackets=brackets, ax=ax, *args, **kwargs)
     else:
         if xlabel is not None:
-            ax.set_xlabel(xlabel, horizontalalignment=ha, x=x,  *args, **kwargs)
+            ax.set_xlabel(xlabel, ha=ha, x=x,  *args, **kwargs)
         if ylabel is not None:
-            draw_y_label(ylabel,  horizontalalignment=ha, y=y, brackets=brackets,ax = ax, *args, **kwargs)
+            draw_y_label(ylabel,  ha=ha, y=y, brackets=brackets,ax = ax, *args, **kwargs)
 
 
 def decorate(*args, **kwargs):

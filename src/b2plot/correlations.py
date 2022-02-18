@@ -141,7 +141,7 @@ def flat_corr_matrix(df, pdf=None, tight=False, labels=None, label_size=None, si
     n_vars = np.shape(df)[1]
 
     
-    fontsize = np.interp(n_vars, (0,10), (22, 10)) if fontsize is 'auto' else fontsize
+    fontsize = np.interp(n_vars, (0,10), (22, 10)) if fontsize == 'auto' else fontsize
 
     if labels is None:
         labels = df.columns
@@ -170,7 +170,7 @@ def flat_corr_matrix(df, pdf=None, tight=False, labels=None, label_size=None, si
         for j, ax in zip(range(n_vars), row):
             if i == n_vars - 1:
                 if label_size is not None:
-                    set_flat_labels(ax, df.iloc[:, j], axis=1, n_labels=n_labels, labelsize=label_size, rotation=90 if tick_label_rotation is 0 else tick_label_rotation, formatter=formatter)
+                    set_flat_labels(ax, df.iloc[:, j], axis=1, n_labels=n_labels, labelsize=label_size, rotation=90 if tick_label_rotation == 0 else tick_label_rotation, formatter=formatter)
                 
                 ax.set_xlabel(labels[j], fontsize=fontsize, rotation=label_rotation,  ha='right', va='top')
             if j == 0:
@@ -217,7 +217,7 @@ def set_flat_labels(ax, x, n_labels=5, axis=1, labelsize=12, rotation=45,
     new_labels = np.percentile(x, np.linspace(0, 100, n_labels))
 
     # print new_labels
-    if axis is 1:
+    if axis == 1:
         ha = 'center' if rotation != 0 else 'right'
         ax.set_xticks(label_position)
         ax.set_xticklabels([formatter % i for i in new_labels], fontsize=labelsize, rotation=rotation, ha=ha)
