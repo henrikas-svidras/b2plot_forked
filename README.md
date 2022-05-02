@@ -21,8 +21,15 @@ Download this repository and run:
 python3 ./setup.py develop --user
 
 ```
+In the case this fails it is also possible to install it using
+```bash
 
-The matolotlib style can be installed in the sytlelib folder:
+python3 -m pip install -U .
+
+```
+If neither of the methods succeed for you can contact @hsvidras on rocket chat, or henrikas.svidras@desy.de
+
+The matplotlib style can be installed in the stylelib folder:
 
 ```bash
 
