@@ -231,8 +231,12 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
                 elif isinstance(scale, dict):
                     assert cats[i] in scale.keys(), "Scale list must have same lenght as data"
                     wei *= scale[cats[i]]
+                elif isinstance(scale, list):
+                    assert isinstance(df, list), "Scales can be list only if df is list"
+                    assert len(data)==len(scale), "Your input df list msut be the same length as scales if providing them as list"
+                    wei *= scale[i]
                 else:
-                    print("Please provide int or float with scale")
+                    print("Please provide int, float or list  with scale")
             weights.append(wei)
 
     xaxis = _hist_init(data[0], bins, xrange=range)
