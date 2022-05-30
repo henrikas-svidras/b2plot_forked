@@ -248,7 +248,7 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
         return y, xaxis, stuff
 
 
-def errorhist(data, bins=None, color=None, normed=False, density=False, fmt='.', range=None, scale=None,
+def errorhist(data, bins=None, color=None, normed=False, density=False, fmt='.', range=None, scale=None, uncertainty_mode="fancy",
               x_err=False, box=False, ax=None, weights=None, plot_zero=True, label=None, paint_uoflow=False, *args, **kwargs):
     """ Histogram as error bar
 
@@ -306,8 +306,10 @@ def errorhist(data, bins=None, color=None, normed=False, density=False, fmt='.',
     y, x = np.histogram(data, xaxis, density=density, weights=weights)
 
     # https://www-cdf.fnal.gov/physics/statistics
-    err = (-0.5*scale + np.sqrt(np.array((y + 0.25)*scale)), +0.5*scale + np.sqrt(np.array((y + 0.25)*scale)))  # np.sqrt(np.array(y))
-    # err = np.sqrt(np.array(y))
+    if uncertainty_mode == "fancy":
+        err = (-0.5*scale + np.sqrt(np.array((y + 0.25)*scale)), +0.5*scale + np.sqrt(np.array((y + 0.25)*scale)))  # np.sqrt(np.array(y))
+    else:
+        err = np.sqrt(np.array(y))*scale
     bin_centers = (x[1:] + x[:-1]) / 2.0
 
     if isinstance(color, int):
