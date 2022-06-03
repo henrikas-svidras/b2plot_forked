@@ -144,7 +144,7 @@ def _notransform(x):
     return x
 
 
-def to_stack(df, col, by, transform=None, get_cats=False):
+def to_stack(df, col, by, transform=None, get_cats=False, order_by_len=True):
     """ Convert columns of a dataframe to a list of lists by 'by'
 
     Args:
@@ -152,6 +152,7 @@ def to_stack(df, col, by, transform=None, get_cats=False):
         col:
         by:
         transform:
+        order_by_len: If true orders the returned data sets by number of entries in each data set.
 
     Returns:
 
@@ -164,16 +165,17 @@ def to_stack(df, col, by, transform=None, get_cats=False):
         x_data.append(transform(g.get_group(gr)[col].values))
 
     cats = np.array([gg for gg in g.groups])
-    x_len = np.array([len(x) for x in x_data])
-    inds = x_len.argsort()
-    # print(cats)
-    # print(inds)
+    if order_by_len:
+        x_len = np.array([len(x) for x in x_data])
+        inds = x_len.argsort()
+        x_data = [x_data[i] for i in inds]
+        cats = cats[inds]
     if get_cats:
-        return [x_data[i] for i in inds], cats[inds]
-    return [x_data[i] for i in inds]
+        return x_data, cats
+    return x_data
 
 
-def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=None, edgecolor='black', weights=None, scale=None, label=None, transform=None, paint_uoflow=False, *args, **kwargs):
+def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=None, edgecolor='black', weights=None, scale=None, label=None, transform=None, paint_uoflow=False, order_by_len=True, *args, **kwargs):
     """ Create stacked histogram
 
     Args:
@@ -194,7 +196,7 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
         assert col is not None, "Please provide column"
         assert by is not None, "Please provide by"
 
-        data, cats = to_stack(df, col, by, transform, get_cats=True)
+        data, cats = to_stack(df, col, by, transform, get_cats=True, order_by_len = order_by_len)
 
         if label is None:
             label = cats
