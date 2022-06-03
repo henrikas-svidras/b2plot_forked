@@ -144,7 +144,7 @@ def _notransform(x):
     return x
 
 
-def to_stack(df, col, by, transform=None, get_cats=False, order_func=None):
+def to_stack(df, col, by, transform=None, get_cats=False, order_func=len):
     """ Convert columns of a dataframe to a list of lists by 'by'
 
     Args:
@@ -175,7 +175,7 @@ def to_stack(df, col, by, transform=None, get_cats=False, order_func=None):
     return x_data
 
 
-def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=None, edgecolor='black', weights=None, scale=None, label=None, transform=None, paint_uoflow=False, order_func=True, *args, **kwargs):
+def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=None, edgecolor='black', weights=None, scale=None, label=None, transform=None, paint_uoflow=False, order_func=len, *args, **kwargs):
     """ Create stacked histogram
 
     Args:
