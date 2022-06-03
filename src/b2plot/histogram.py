@@ -144,7 +144,7 @@ def _notransform(x):
     return x
 
 
-def to_stack(df, col, by, transform=None, get_cats=False, order_by_len=True):
+def to_stack(df, col, by, transform=None, get_cats=False, order_func=None):
     """ Convert columns of a dataframe to a list of lists by 'by'
 
     Args:
@@ -152,7 +152,7 @@ def to_stack(df, col, by, transform=None, get_cats=False, order_by_len=True):
         col:
         by:
         transform:
-        order_by_len: If true orders the returned data sets by number of entries in each data set.
+        order_func: Function applied to data sets to determine the order in which they are plotted. Return value must be sortable.
 
     Returns:
 
@@ -165,8 +165,8 @@ def to_stack(df, col, by, transform=None, get_cats=False, order_by_len=True):
         x_data.append(transform(g.get_group(gr)[col].values))
 
     cats = np.array([gg for gg in g.groups])
-    if order_by_len:
-        x_len = np.array([len(x) for x in x_data])
+    if order_func is not None:
+        x_len = np.array([order_func(x) for x in x_data])
         inds = x_len.argsort()
         x_data = [x_data[i] for i in inds]
         cats = cats[inds]
@@ -175,7 +175,7 @@ def to_stack(df, col, by, transform=None, get_cats=False, order_by_len=True):
     return x_data
 
 
-def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=None, edgecolor='black', weights=None, scale=None, label=None, transform=None, paint_uoflow=False, order_by_len=True, *args, **kwargs):
+def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=None, edgecolor='black', weights=None, scale=None, label=None, transform=None, paint_uoflow=False, order_func=True, *args, **kwargs):
     """ Create stacked histogram
 
     Args:
@@ -185,6 +185,7 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
         bins:
         color:
         lw:
+        order_func: Function applied to data sets to determine the order in which they are plotted. Return value must be sortable.
         *args:
         **kwargs:
 
@@ -196,7 +197,7 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
         assert col is not None, "Please provide column"
         assert by is not None, "Please provide by"
 
-        data, cats = to_stack(df, col, by, transform, get_cats=True, order_by_len = order_by_len)
+        data, cats = to_stack(df, col, by, transform, get_cats=True, order_func = order_func)
 
         if label is None:
             label = cats
