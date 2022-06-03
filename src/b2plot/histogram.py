@@ -152,7 +152,7 @@ def to_stack(df, col, by, transform=None, get_cats=False, order_func=None):
         col:
         by:
         transform:
-        order_func: Function applied to data sets to determine the order in which they are plotted. Return value must be sortable.
+        order_func: Function applied to dataframes after splitting to determine the order in which they are plotted. Return value must be sortable. The function should take a single input which should be a dataframe.
 
     Returns:
 
@@ -185,7 +185,7 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
         bins:
         color:
         lw:
-        order_func: Function applied to data sets to determine the order in which they are plotted. Return value must be sortable.
+        order_func: Function applied to dataframes after splitting to determine the order in which they are plotted. Return value must be sortable. The function should take a single input which should be a dataframe.
         *args:
         **kwargs:
 
