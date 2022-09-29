@@ -94,9 +94,13 @@ def divide_efficiency(n_nom, n_denom, confidence=0.683, scale=None):
     flattened_n_denom = n_denom.flatten()
 
     if scale is not None:
-        #"descaling"
-        flattened_n_nom /= scale
-        flattened_n_denom /= scale
+        if (isinstance(scale, list) and len(scale)>2) or isinstance(scale, tuple):
+            assert len(scale)==2, "If giving scale as list or tuple, give it as a list of 2"
+            flattened_n_nom /= scale[0]
+            flattened_n_denom /= scale[1]
+        else:
+            flattened_n_nom /= scale
+            flattened_n_denom /= scale
 
     rat = []
     err_down = []
@@ -113,6 +117,74 @@ def divide_efficiency(n_nom, n_denom, confidence=0.683, scale=None):
 
     return rat, (err_down, err_up)
 
+
+def binom_ratio_err(k1,n1, k2,n2):
+    """ Confidence interval for a ratio between two confidence intervals.
+
+    Args:
+        k1, n1 : for the binomial 1
+        k2, n2 : for the binomial 2
+
+    (k1/n1) / (k2/n2)
+    Based on the conditional odds ratio ~ p1 / (p1 + p2)
+    Implemented following the example on DOI: 10.1101/2020.11.19.20235036 (see section 3.3)
+    Which itself is based on: DOI: 10.1177/0962280219886889
+    """
+
+    _, c0, c1 = exact_CI(k=k1, n=k1+k2)
+
+    lower = n2 / n1 * c0 / (1 - c0)
+    upper = n2 / n1 * c1 / (1 - c1)
+
+    return np.array([lower, upper])
+
+def divide_ratios(n_nom1, n_denom1, n_nom2, n_denom2, scale1=None, scale2=None):
+    """ divides two ratios (for example two efficiencies)
+
+    Args:
+        n_nom1: y values of nominator histogram (1d or 2d)
+        n_denom1: y values of denominator histogram  (1d or 2d)
+        n_nom2: y values of nominator histogram (1d or 2d)
+        n_denom2: y values of denominator histogram  (1d or 2d)
+
+    Returns:
+        ratio, [lower ratio error, upper ratio error]
+    """
+    n_nom1 = np.array(n_nom1)
+    n_denom1 = np.array(n_denom1)
+    n_nom2 = np.array(n_nom2)
+    n_denom2 = np.array(n_denom2)
+
+    shape = np.shape(n_nom1) # It is automatically assumed that histograms are compatible. This will probably fail later if they're not.
+
+    flattened_n_nom1 = n_nom1.flatten()
+    flattened_n_denom1 = n_denom1.flatten()
+    flattened_n_nom2 = n_nom2.flatten()
+    flattened_n_denom2 = n_denom2.flatten()
+
+    if scale1 is not None:
+        #"descaling"
+        flattened_n_nom1 /= scale1
+        flattened_n_denom1 /= scale1
+    if scale2 is not None:
+        #"descaling"
+        flattened_n_nom2 /= scale2
+        flattened_n_denom2 /= scale2
+
+    rat = []
+    err_down = []
+    err_up = []
+    for passes1, counts1, passes2, counts2 in zip(flattened_n_nom1, flattened_n_denom1, flattened_n_nom2, flattened_n_denom2):
+        error = binom_ratio_err(passes1, counts1, passes2, counts2)
+        rat.append((passes1/counts1)/(passes2/counts2))
+        err_down.append(error[0])
+        err_up.append(error[1])
+
+    err_down = np.reshape(err_down, shape)
+    err_up = np.reshape(err_up, shape)
+    rat = np.reshape(rat, shape)
+
+    return rat, (err_down, err_up)
 
 def exact_CI(k, n, conf=0.683):
     """ calculated clopper pearson confidence intervals
