@@ -144,7 +144,7 @@ def _notransform(x):
     return x
 
 
-def to_stack(df, col, by, transform=None, get_cats=False, order_func=len):
+def to_stack(df, col, by, transform=None, get_cats=False, stack_weights=False, order_func=len):
     """ Convert columns of a dataframe to a list of lists by 'by'
 
     Args:
@@ -153,6 +153,7 @@ def to_stack(df, col, by, transform=None, get_cats=False, order_func=len):
         by:
         transform:
         order_func: Function applied to dataframes after splitting to determine the order in which they are plotted. Return value must be sortable. The function should take a single input which should be a dataframe.
+        stack_weights: False or column name as string which contains the values that are to become weights
 
     Returns:
 
@@ -161,18 +162,26 @@ def to_stack(df, col, by, transform=None, get_cats=False, order_func=len):
     g = df.groupby(by)
     transform = _notransform if transform is None else transform
     x_data = []
+    x_weights = []
+
     for gr in g.groups:
         x_data.append(transform(g.get_group(gr)[col].values))
+
+        if stack_weights:
+            x_weights.append(transform(g.get_group(gr)[stack_weights].values))
 
     cats = np.array([gg for gg in g.groups])
     if order_func is not None:
         x_len = np.array([order_func(x) for x in x_data])
         inds = x_len.argsort()
         x_data = [x_data[i] for i in inds]
+        if stack_weights:
+            x_weights = [x_weights[i] for i in inds]
         cats = cats[inds]
+
     if get_cats:
-        return x_data, cats
-    return x_data
+        return x_data, x_weights, cats
+    return x_data, x_weights
 
 
 def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=None, edgecolor='black', weights=None, scale=None, label=None, transform=None, paint_uoflow=False, order_func=len, *args, **kwargs):
@@ -186,6 +195,7 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
         color:
         lw:
         order_func: Function applied to dataframes after splitting to determine the order in which they are plotted. Return value must be sortable. The function should take a single input which should be a dataframe.
+        weights: Weights can be supplied as a column within the dataframe, or as a stacked list appropriately to the input data.
         *args:
         **kwargs:
 
@@ -197,7 +207,15 @@ def stacked(df, col=None, by=None, bins=None, color=None, range=None, lw=.5, ax=
         assert col is not None, "Please provide column"
         assert by is not None, "Please provide by"
 
-        data, cats = to_stack(df, col, by, transform, get_cats=True, order_func = order_func)
+        if isinstance(weights, str):
+            stack_weights = weights
+        else:
+            stack_weights = False
+
+
+        data, stacked_weights, cats = to_stack(df, col, by, transform, get_cats=True, stack_weights=stack_weights, order_func = order_func)
+        if stack_weights:
+            weights = stacked_weights
 
         if label is None:
             label = cats
