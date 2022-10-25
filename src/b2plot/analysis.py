@@ -544,7 +544,8 @@ def sig_bkg_plot(df, col, by=None, ax=None, bins=None, range=None, labels=None, 
     if isinstance(df, pd.DataFrame):
         # by is not a boolean index
         if isinstance(by, str):
-            x, cats = to_stack(df, col, by, get_cats=True)
+            # won't work with weights at the moment
+            x, _, cats = to_stack(df, col, by, get_cats=True)
             if len(x) > 2 :
                 print("Waring, more than two categories in %s!" % by)
                 assert len(x) > 1, "Did not found any categories in %s!" % by
